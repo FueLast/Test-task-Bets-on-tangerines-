@@ -16,6 +16,10 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
+
+builder.Services.AddScoped<IAuctionService, AuctionService>();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -42,7 +46,30 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    if (!db.Mandarins.Any())
+    {
+        db.Mandarins.Add(new MandarinBid.Models.Mandarin
+        {
+            Name = "Мандаринка #1",
+            CurrentPrice = 100,
+            ExpirationDate = DateTime.UtcNow.AddMinutes(30)
+        });
+
+        db.Mandarins.Add(new MandarinBid.Models.Mandarin
+        {
+            Name = "Мандаринка #2",
+            CurrentPrice = 150,
+            ExpirationDate = DateTime.UtcNow.AddMinutes(60)
+        });
+
+        db.SaveChanges();
+    }
+}
+
 app.Run();
 
 
-builder.Services.AddScoped<IAuctionService, AuctionService>();

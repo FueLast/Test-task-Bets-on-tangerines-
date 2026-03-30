@@ -1,0 +1,27 @@
+﻿@model List<MandarinBid.Models.Mandarin>
+
+@{
+    ViewData["Title"] = "Аукцион";
+}
+
+<h2>Аукцион мандаринок</h2>
+
+<div class="row">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-3">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5>@item.Name</h5>
+
+                    <p>Цена: @item.CurrentPrice ₽</p>
+                    <p>До: @item.ExpirationDate</p>
+
+                    <button class="btn btn-primary">
+                        Сделать ставку
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
