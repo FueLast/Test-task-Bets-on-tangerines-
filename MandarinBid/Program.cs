@@ -1,4 +1,6 @@
 using MandarinBid.Data;
+using MandarinBid.Services.Interfaces;
+using MandarinBid.Services.Implementations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,3 +43,6 @@ app.MapControllerRoute(
 app.MapRazorPages();
 
 app.Run();
+
+
+builder.Services.AddScoped<IAuctionService, AuctionService>();

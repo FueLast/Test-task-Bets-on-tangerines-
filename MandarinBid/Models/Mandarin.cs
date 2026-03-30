@@ -13,15 +13,15 @@ namespace MandarinBid.Models
 
         public DateTime CreatedAt { get; set; }
 
-        public DateTime ExpirationDate { get; set; }
+        public DateTime ExpirationDate { get; set; } // дата окончания аукциона
 
         public string? ImageUrl { get; set; }
 
-        // для оптимистичной конкуренции (очень важно для аукциона)
+        // для конкуренции (важно для аукциона)
         [Timestamp]
         public byte[] RowVersion { get; set; }
 
-        // навигация к ставкам
+        // навигация к ставкам (связь 1 ко многим)
         public List<Bid> Bids { get; set; } = new();
     }
 }
