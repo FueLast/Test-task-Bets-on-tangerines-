@@ -17,8 +17,9 @@ namespace MandarinBid.Services.Implementations
         public async Task<List<Mandarin>> GetActiveMandarinsAsync()
         {
             return await _db.Mandarins
-                .Include(m => m.Bids)
+                .Include(m => m.Bids) //подгружаем ставки
                 .Where(m => m.ExpirationDate > DateTime.UtcNow)
+                .AsNoTracking()
                 .ToListAsync();
         }
 

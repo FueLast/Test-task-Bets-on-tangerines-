@@ -50,6 +50,37 @@
                     {
                         <p>войдите чтобы делать ставки</p>
                     }
+
+                    @if (item.Bids != null && item.Bids.Any())
+                    {
+                        var orderedBids = item.Bids
+                            .OrderByDescending(b => b.Amount) //сортировка
+                            .Take(5) // ограничение
+                            .ToList();
+
+                        <hr />
+                        <p><strong>Топ ставок:</strong></p>
+
+                        <ul class="list-group">
+                            @foreach (var bid in orderedBids) // подсветка лидера
+                            {
+                                var isTop = bid == orderedBids.First();
+
+                                <li class="list-group-item d-flex justify-content-between @(isTop ? "list-group-item-success" : "")">
+                                    <span>@bid.UserId</span>
+                                    <span>@bid.Amount ₽</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p>Пока нет ставок</p>
+                    }
+
+ 
+
+
                 </div>
             </div>
         </div>
