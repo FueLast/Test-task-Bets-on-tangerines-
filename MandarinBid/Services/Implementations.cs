@@ -16,10 +16,9 @@ namespace MandarinBid.Services.Implementations
 
         public async Task<List<Mandarin>> GetActiveMandarinsAsync()
         {
-            // берем только активные мандаринки
             return await _db.Mandarins
-                .Where(m => m.ExpirationDate > DateTime.UtcNow)
-                .AsNoTracking() // быстрее, так как только читаем
+                .Include(m => m.Bids)
+                .AsNoTracking()
                 .ToListAsync();
         }
 

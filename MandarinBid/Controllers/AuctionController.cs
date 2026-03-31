@@ -32,12 +32,16 @@ namespace MandarinBid.Controllers
 
             if (!result)
             {
-                // можно позже сделать красивую ошибку
-                TempData["Error"] = "Ставка не принята";
+                TempData["Error"] = "Ставка должна быть выше текущей";
+            }
+            else
+            {
+                TempData["Success"] = "Ставка принята";
             }
 
             return RedirectToAction("Index");
         }
+
 
     }
 }
