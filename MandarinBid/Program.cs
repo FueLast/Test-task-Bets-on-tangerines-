@@ -1,6 +1,7 @@
 using MandarinBid.Data;
-using MandarinBid.Services.Interfaces;
+using MandarinBid.Services;
 using MandarinBid.Services.Implementations;
+using MandarinBid.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,7 +25,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 //builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     //.AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddHostedService<MandarinGeneratorService>();
 
 
 builder.Services.AddScoped<IAuctionService, AuctionService>();
