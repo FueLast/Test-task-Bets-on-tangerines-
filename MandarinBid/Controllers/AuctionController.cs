@@ -1,5 +1,7 @@
-﻿using MandarinBid.Services.Interfaces;
+﻿using MandarinBid.Models;
+using MandarinBid.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace MandarinBid.Controllers
@@ -18,7 +20,7 @@ namespace MandarinBid.Controllers
             var mandarins = await _auctionService.GetActiveMandarinsAsync();
 
             return View(mandarins);
-        }
+        } 
 
         [HttpPost]
         public async Task<IActionResult> PlaceBid(int mandarinId, decimal amount)

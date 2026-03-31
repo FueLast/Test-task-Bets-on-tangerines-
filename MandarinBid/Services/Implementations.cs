@@ -18,7 +18,7 @@ namespace MandarinBid.Services.Implementations
         {
             return await _db.Mandarins
                 .Include(m => m.Bids)
-                .AsNoTracking()
+                .Where(m => m.ExpirationDate > DateTime.UtcNow)
                 .ToListAsync();
         }
 
