@@ -39,6 +39,7 @@ namespace MandarinBid.Controllers
             else
             {
                 TempData["Success"] = "Ставка принята";
+                TempData["SuccessMandarinId"] = mandarinId;
             }
 
             return RedirectToAction("Index");

@@ -13,14 +13,16 @@
                     <p>Цена: @item.CurrentPrice ₽</p>
                     <p>До: @item.ExpirationDate</p>
 
-                    @if (TempData["Error"] != null)
+                    @if (TempData["Error"] != null &&
+                        TempData["SuccessMandarinId"]?.ToString() == item.Id.ToString())
                     {
                         <div class="alert alert-danger">
                             @TempData["Error"]
                         </div>
                     }
 
-                    @if (TempData["Success"] != null)
+                    @if (TempData["Success"] != null &&
+                        TempData["SuccessMandarinId"]?.ToString() == item.Id.ToString())
                     {
                         <div class="alert alert-success">
                             @TempData["Success"]
