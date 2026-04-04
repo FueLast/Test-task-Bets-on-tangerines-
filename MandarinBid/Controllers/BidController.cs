@@ -26,5 +26,6 @@ public class BidController : Controller
         }
 
         return RedirectToAction("Index", "Auction");
+         
     }
 }

@@ -35,6 +35,18 @@ namespace MandarinBid.Services.Implementations
             if (amount <= mandarin.CurrentPrice)
                 return false;
 
+
+            //проверка ставки
+            var topBid = mandarin.Bids
+                .OrderByDescending(b => b.Amount)
+                .FirstOrDefault();
+
+            if (topBid != null && topBid.UserId == userId)
+            {
+                return false; // ты уже лидер ставки
+            }
+
+
             mandarin.CurrentPrice = amount;
 
             _db.Bids.Add(new Bid
@@ -55,6 +67,8 @@ namespace MandarinBid.Services.Implementations
                 // кто-то успел раньше
                 return false;
             }
+
+ 
         }
     }
 }
