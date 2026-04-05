@@ -31,7 +31,7 @@ namespace MandarinBid.Services.Background
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
             var expired = await db.Mandarins
-                .Where(m => m.ExpirationDate <= DateTime.UtcNow)
+                .Where(m => m.ExpirationDate <= DateTimeOffset.UtcNow)
                 .ToListAsync();
 
             if (expired.Any())

@@ -11,7 +11,7 @@
                     <h5>@item.Name</h5>
 
                     <p>Цена: @item.CurrentPrice ₽</p>
-                    <p>До: @item.ExpirationDate</p>
+                    <p>До: @item.ExpirationDate.ToLocalTime().ToString("HH:mm:ss")</p>
 
                      
 
@@ -34,7 +34,7 @@
 
                     @using System.Security.Claims
 
-@{
+                    @{
                         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                     }
 
@@ -45,7 +45,7 @@
 
                         <p>Лидер: @topBid.UserId</p>
 
-                        @if (User.Identity.IsAuthenticated && item.ExpirationDate > DateTime.UtcNow)
+                        @if (User.Identity.IsAuthenticated && item.ExpirationDate > DateTimeOffset.UtcNow)
                         {
                             <form asp-controller="Auction" asp-action="PlaceBid" method="post">
                                 <input type="hidden" name="mandarinId" value="@item.Id" />
@@ -53,14 +53,14 @@
                                 <button type="submit" class="btn btn-success">Сделать ставку</button>
                             </form>
                         }
-                        else if (item.ExpirationDate <= DateTime.UtcNow)
+                        else if (item.ExpirationDate <= DateTimeOffset.UtcNow)
                         {
                             <p class="text-danger">Ставки закрыты</p>
                         }
                     }
                     else
                     {
-                        if (User.Identity.IsAuthenticated)
+                        @if (User.Identity.IsAuthenticated && item.ExpirationDate > DateTimeOffset.UtcNow)
                         {
                             <form asp-controller="Auction" asp-action="PlaceBid" method="post">
                                 <input type="hidden" name="mandarinId" value="@item.Id" />
@@ -104,7 +104,7 @@
 
                     @item.ExpirationDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
 
-                    @if (item.ExpirationDate <= DateTime.UtcNow)
+                    @if (item.ExpirationDate <= DateTimeOffset.UtcNow)
                     {
                         <p class="text-danger"><strong>Аукцион завершен</strong></p>
                     }
@@ -120,7 +120,7 @@
                     {
                         var topBid = item.Bids.OrderByDescending(b => b.Amount).First();
 
-                        if (item.ExpirationDate <= DateTime.UtcNow)
+                        if (item.ExpirationDate <= DateTimeOffset.UtcNow)
                         {
                             <p class="text-primary">
                                 Победитель: @topBid.UserId
@@ -140,9 +140,8 @@
         document.querySelectorAll('[data-expiration]').forEach(el => {
             const expiration = new Date(el.dataset.expiration);
             const now = new Date();
-            const nowUtc = new Date(now.toISOString());
 
-            if (expiration <= nowUtc) {
+            if (expiration <= now) {
                 el.innerText = "Аукцион завершен";
                 el.classList.add("text-danger");
             }

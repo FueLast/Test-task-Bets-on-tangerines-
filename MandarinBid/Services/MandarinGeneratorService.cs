@@ -30,9 +30,9 @@ namespace MandarinBid.Services
 
             var mandarin = new Mandarin
             {
-                Name = $"🍊Мандаринка {DateTime.UtcNow:HH:mm:ss}",
+                Name = $"🍊Мандаринка {DateTimeOffset.UtcNow:HH:mm:ss}",
                 CurrentPrice = 50,
-                ExpirationDate = DateTime.UtcNow.AddMinutes(10)
+                ExpirationDate = DateTimeOffset.UtcNow.AddMinutes(1)
             };
 
             db.Mandarins.Add(mandarin);

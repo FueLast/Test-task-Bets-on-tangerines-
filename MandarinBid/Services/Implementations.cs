@@ -18,7 +18,7 @@ namespace MandarinBid.Services.Implementations
         {
             return await _db.Mandarins
                 .Include(m => m.Bids) //подгружаем ставки
-                .Where(m => m.ExpirationDate > DateTime.UtcNow)
+                .Where(m => m.ExpirationDate > DateTimeOffset.UtcNow)
                 .AsNoTracking()
                 .ToListAsync();
         }
@@ -32,7 +32,7 @@ namespace MandarinBid.Services.Implementations
             if (mandarin == null)
                 return false;
 
-            if (mandarin.ExpirationDate <= DateTime.UtcNow)
+            if (mandarin.ExpirationDate <= DateTimeOffset.UtcNow)
                 return false;
 
 
@@ -65,7 +65,7 @@ namespace MandarinBid.Services.Implementations
 
             try
             {
-                await _db.SaveChangesAsync(); // тут может упасть из-за concurrency
+                await _db.SaveChangesAsync();
                 return true;
             }
             catch (DbUpdateConcurrencyException)

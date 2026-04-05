@@ -13,7 +13,7 @@ namespace MandarinBid.Models
 
         public DateTime CreatedAt { get; set; }
 
-        public DateTime ExpirationDate { get; set; } // дата окончания аукциона
+        public DateTimeOffset ExpirationDate { get; set; } // дата окончания аукциона 
 
         public string? ImageUrl { get; set; }
 
