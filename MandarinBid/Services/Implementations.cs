@@ -26,14 +26,20 @@ namespace MandarinBid.Services.Implementations
         public async Task<bool> PlaceBidAsync(int mandarinId, decimal amount, string userId)
         {
             var mandarin = await _db.Mandarins
+                .Include (m => m.Bids)
                 .FirstOrDefaultAsync(m => m.Id == mandarinId);
 
             if (mandarin == null)
                 return false;
 
+            if (mandarin.ExpirationDate <= DateTime.UtcNow)
+                return false;
+
+
             // проверяем, что ставка выше текущей
             if (amount <= mandarin.CurrentPrice)
                 return false;
+
 
 
             //проверка ставки

@@ -68,7 +68,7 @@ using (var scope = app.Services.CreateScope())
         {
             Name = "Мандаринка #1",
             CurrentPrice = 100,
-            ExpirationDate = DateTime.UtcNow.AddMinutes(30)
+            ExpirationDate = DateTime.UtcNow.AddMinutes(1)
         });
 
         db.Mandarins.Add(new MandarinBid.Models.Mandarin
