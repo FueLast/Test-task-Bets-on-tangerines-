@@ -13,7 +13,7 @@ namespace MandarinBid.Models
 
         public decimal Amount { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
 
         // навигация
         public Mandarin Mandarin { get; set; }

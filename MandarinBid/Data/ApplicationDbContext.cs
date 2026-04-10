@@ -28,6 +28,15 @@ namespace MandarinBid.Data
             builder.Entity<Bid>()
                 .Property(b => b.Amount)
                 .HasPrecision(18, 2);
+
+            builder.Entity<Mandarin>()
+                .Property(m => m.ExpirationDate)
+                .HasColumnType("datetimeoffset");
+
+            builder.Entity<Mandarin>()
+                .Property(m => m.CreatedAt)
+                .HasColumnType("datetimeoffset"); 
+
         }
 
     }

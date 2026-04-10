@@ -11,7 +11,7 @@ namespace MandarinBid.Models
 
         public decimal CurrentPrice { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
 
         public DateTimeOffset ExpirationDate { get; set; } // дата окончания аукциона 
 

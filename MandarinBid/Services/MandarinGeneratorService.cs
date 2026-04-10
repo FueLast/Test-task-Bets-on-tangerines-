@@ -28,11 +28,14 @@ namespace MandarinBid.Services
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
+            var now = DateTimeOffset.UtcNow;
+
             var mandarin = new Mandarin
             {
-                Name = $"🍊Мандаринка {DateTimeOffset.UtcNow:HH:mm:ss}",
+                Name = $"🍊Мандаринка {now.ToLocalTime():HH:mm:ss}", 
                 CurrentPrice = 50,
-                ExpirationDate = DateTimeOffset.UtcNow.AddMinutes(1)
+                CreatedAt = now,
+                ExpirationDate = now.AddMinutes(1)
             };
 
             db.Mandarins.Add(mandarin);
