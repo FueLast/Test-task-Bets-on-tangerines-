@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MandarinBid.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260409191304_InitClean")]
-    partial class InitClean
+    [Migration("20260411174247_InitFixed")]
+    partial class InitFixed
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,8 +37,8 @@ namespace MandarinBid.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("MandarinId")
                         .HasColumnType("int");

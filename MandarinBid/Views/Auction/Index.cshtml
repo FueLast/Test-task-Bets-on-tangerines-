@@ -1,92 +1,95 @@
 ﻿@model List<MandarinBid.Models.Mandarin>
 
+@using System.Security.Claims
+
 <h2>Аукцион мандаринок</h2>
 
 <div class="row">
     @foreach (var item in Model)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isExpired = item.ExpirationDate <= DateTimeOffset.UtcNow;
+        var hasBids = item.Bids != null && item.Bids.Any();
+        var topBid = hasBids ? item.Bids.OrderByDescending(b => b.Amount).First() : null;
+        var isLeader = topBid != null && topBid.UserId == userId;
+
         <div class="col-md-3">
             <div class="card mb-3">
                 <div class="card-body">
+
                     <h5>@item.Name</h5>
 
                     <p>Цена: @item.CurrentPrice ₽</p>
-                    <p>До:@item.ExpirationDate.ToLocalTime().ToString("HH:mm:ss")</p>
+                    <p>До: @item.ExpirationDate.ToLocalTime().ToString("HH:mm:ss")</p>
 
-                     
-
+                    @* Ошибки *@
                     @if (TempData["Error"] != null &&
-                        TempData["SuccessMandarinId"]?.ToString() == item.Id.ToString())
+                                         TempData["SuccessMandarinId"]?.ToString() == item.Id.ToString())
                     {
                         <div class="alert alert-danger">
                             @TempData["Error"]
                         </div>
                     }
 
-
                     @if (TempData["Success"] != null &&
-                        TempData["SuccessMandarinId"]?.ToString() == item.Id.ToString())
+                                         TempData["SuccessMandarinId"]?.ToString() == item.Id.ToString())
                     {
                         <div class="alert alert-success">
                             @TempData["Success"]
                         </div>
                     }
 
-                    @using System.Security.Claims
-
-                    @{
-                        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    @* Лидер *@
+                    @if (topBid != null)
+                    {
+                        <p>Лидер: @topBid.UserId</p>
                     }
 
-
-                    @if (item.Bids != null && item.Bids.Any())
+                    @* Блок ставок *@
+                    @if (!User.Identity.IsAuthenticated)
                     {
-                        var topBid = item.Bids.OrderByDescending(b => b.Amount).First();
-
-                        <p>Лидер: @topBid.UserId</p>
-
-                        @if (User.Identity.IsAuthenticated && item.ExpirationDate > DateTimeOffset.UtcNow)
-                        {
-                            <form asp-controller="Auction" asp-action="PlaceBid" method="post">
-                                <input type="hidden" name="mandarinId" value="@item.Id" />
-                                <input type="number" step="0.01" name="amount" class="form-control mb-2" placeholder="твоя ставка" />
-                                <button type="submit" class="btn btn-success">Сделать ставку</button>
-                            </form>
-                        }
-                        else if (item.ExpirationDate <= DateTimeOffset.UtcNow)
-                        {
-                            <p class="text-danger">Ставки закрыты</p>
-                        }
+                        <p>Войдите чтобы делать ставки</p>
+                    }
+                    else if (isExpired)
+                    {
+                        <p class="text-danger">Ставки закрыты</p>
+                    }
+                    else if (isLeader)
+                    {
+                        <p class="text-success"><strong>Ты лидер</strong></p>
                     }
                     else
                     {
-                        @if (User.Identity.IsAuthenticated && item.ExpirationDate > DateTimeOffset.UtcNow)
-                        {
-                            <form asp-controller="Auction" asp-action="PlaceBid" method="post">
-                                <input type="hidden" name="mandarinId" value="@item.Id" />
-                                <input type="number" step="0.01" name="amount" class="form-control mb-2" placeholder="твоя ставка" />
-                                <button type="submit" class="btn btn-success">Сделать ставку</button>
-                            </form>
-                        }
-                        else
-                        {
-                            <p>войдите чтобы делать ставки</p>
-                        }
-                    } 
+                        <form asp-controller="Auction" asp-action="PlaceBid" method="post">
+                            <input type="hidden" name="mandarinId" value="@item.Id" />
 
+                            <input type="number"
+                                   step="0.01"
+                                   min="0.01"
+                                   name="amount"
+                                   class="form-control mb-2"
+                                   placeholder="твоя ставка"
+                                   required />
 
-                    @if (item.Bids != null && item.Bids.Any())
+                            <button type="submit" class="btn btn-success">
+                                Сделать ставку
+                            </button>
+                        </form>
+                    }
+
+                    @* Топ ставок *@
+                    @if (hasBids)
                     {
                         var orderedBids = item.Bids
-                            .OrderByDescending(b => b.Amount) //сортировка
-                            .Take(5) // ограничение
+                            .OrderByDescending(b => b.Amount)
+                            .Take(5)
                             .ToList();
 
                         <hr />
                         <p><strong>Топ ставок:</strong></p>
 
                         <ul class="list-group">
-                            @foreach (var bid in orderedBids) // подсветка лидера
+                            @foreach (var bid in orderedBids)
                             {
                                 var isTop = bid == orderedBids.First();
 
@@ -102,38 +105,31 @@
                         <p>Пока нет ставок</p>
                     }
 
-                    @item.ExpirationDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                    <p>@item.ExpirationDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p>
 
-                    @if (item.ExpirationDate <= DateTimeOffset.UtcNow)
+                    @if (isExpired)
                     {
                         <p class="text-danger"><strong>Аукцион завершен</strong></p>
+
+                        @if (topBid != null)
+                        {
+                            <p class="text-primary">
+                                Победитель: @topBid.UserId
+                            </p>
+                        }
                     }
                     else
                     {
                         <p data-expiration="@item.ExpirationDate.ToString("o")">
                             Активен
                         </p>
-                    }  
-
-
-                    @if (item.Bids != null && item.Bids.Any())
-                    {
-                        var topBid = item.Bids.OrderByDescending(b => b.Amount).First();
-
-                        if (item.ExpirationDate <= DateTimeOffset.UtcNow)
-                        {
-                            <p class="text-primary">
-                                Победитель: @topBid.UserId
-                            </p>
-                        }
-                    } 
+                    }
 
                 </div>
             </div>
         </div>
     }
-</div> 
-
+</div>
 
 <script>
     function updateTimers() {

@@ -6,6 +6,14 @@ namespace MandarinBid.Services.Interfaces
     {
         Task<List<Mandarin>> GetActiveMandarinsAsync();
 
-        Task<bool> PlaceBidAsync(int mandarinId, decimal amount, string userId);
+        Task<(bool Success, string Error)> PlaceBidAsync(int mandarinId, decimal amount, string userId);
     }
+
+    public interface IEmailService
+    {
+        Task SendAsync(string to, string subject, string body);
+    }
+    
+
+
 }

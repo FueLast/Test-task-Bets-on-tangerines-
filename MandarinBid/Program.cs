@@ -28,7 +28,10 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddHostedService<MandarinGeneratorService>();
 builder.Services.AddHostedService<MandarinCleanupService>();
+builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+builder.Services.AddHostedService<EmailBackgroundService>();
 
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 builder.Services.AddScoped<IAuctionService, AuctionService>();
 
 

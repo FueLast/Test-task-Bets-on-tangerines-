@@ -32,9 +32,10 @@ namespace MandarinBid.Controllers
 
             var result = await _auctionService.PlaceBidAsync(mandarinId, amount, userId);
 
-            if (!result)
+            if (!result.Success)
             {
-                TempData["Error"] = "Ставка должна быть выше текущей";
+                TempData["Error"] = result.Error;
+                TempData["SuccessMandarinId"] = mandarinId;
             }
             else
             {
