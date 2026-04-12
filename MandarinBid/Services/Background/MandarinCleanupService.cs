@@ -1,7 +1,9 @@
 ﻿using MandarinBid.Data;
 using MandarinBid.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Collections;
+using System.Reflection;
 
 namespace MandarinBid.Services.Background
 {
@@ -33,7 +35,8 @@ namespace MandarinBid.Services.Background
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
             var queue = scope.ServiceProvider.GetRequiredService<IBackgroundTaskQueue>();
-
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+ 
 
             var expired = await db.Mandarins
                 .Include(m => m.Bids)
@@ -46,9 +49,18 @@ namespace MandarinBid.Services.Background
                     .OrderByDescending(b => b.Amount)
                     .FirstOrDefault();
 
-                if (winner != null)
+                // нет ставок -просто пропускаем
+                if (winner == null)
                 {
-                    var email = winner.UserId + "@test.com";
+                    Console.WriteLine($"[Cleanup] {mandarin.Name} завершён без ставок");
+                    continue;
+                }
+
+                var user = await userManager.FindByIdAsync(winner.UserId);
+
+                if (user != null && !string.IsNullOrEmpty(user.Email))
+                {
+                    var email = user.Email;
 
                     queue.Queue(async token =>
                     {

@@ -15,15 +15,30 @@ namespace MandarinBid.Services
 
         public async Task SendAsync(string to, string subject, string body)
         {
-            var client = new SmtpClient("smtp.gmail.com", 587)
+            try
             {
-                Credentials = new NetworkCredential("your@email.com", "password"),
-                EnableSsl = true
-            };
+                var client = new SmtpClient(_config["Email:Host"], int.Parse(_config["Email:Port"]))
+                {
+                    Credentials = new NetworkCredential(
+                        _config["Email:User"],
+                        _config["Email:Pass"]
+                    ),
+                    EnableSsl = true
+                };
 
-            var mail = new MailMessage("your@email.com", to, subject, body);
+                var mail = new MailMessage(
+                    _config["Email:From"],
+                    to,
+                    subject,
+                    body
+                );
 
-            await client.SendMailAsync(mail);
+                await client.SendMailAsync(mail);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[EMAIL ERROR] {ex.Message}");
+            }
         }
     }
 }

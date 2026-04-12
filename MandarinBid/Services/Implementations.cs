@@ -3,6 +3,7 @@ using MandarinBid.Models;
 using MandarinBid.Services.Background;
 using MandarinBid.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace MandarinBid.Services.Implementations
 {
@@ -12,14 +13,18 @@ namespace MandarinBid.Services.Implementations
         private readonly IBackgroundTaskQueue _queue;
         private readonly IEmailService _email;
 
+        private readonly UserManager<IdentityUser> _userManager;
+
         public AuctionService(
             ApplicationDbContext db,
             IBackgroundTaskQueue queue,
-            IEmailService email)
+            IEmailService email,
+            UserManager<IdentityUser> userManager)
         {
             _db = db;
             _queue = queue;
             _email = email;
+            _userManager = userManager;
         }
 
         public async Task<List<Mandarin>> GetActiveMandarinsAsync()
@@ -71,13 +76,18 @@ namespace MandarinBid.Services.Implementations
                 {
                     _queue.Queue(async token =>
                     {
-                        var email = previousTopBid.UserId + "@test.com";
+                        var user = await _userManager.FindByIdAsync(previousTopBid.UserId);
 
-                        await _email.SendAsync(
-                            email,
-                            "Ваша ставка перебита",
-                            $"Вашу ставку на {mandarin.Name} перебили"
-                        );
+                        if (user != null && !string.IsNullOrEmpty(user.Email))
+                        {
+                            var email = user.Email;
+
+                            await _email.SendAsync(
+                                email,
+                                "Ваша ставка перебита",
+                                $"Вашу ставку на {mandarin.Name} перебили"
+                            );
+                        }
                     });
                 }
 
