@@ -1,4 +1,5 @@
 ﻿using MandarinBid.Data;
+using MandarinBid.Models;
 using MandarinBid.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -36,11 +37,12 @@ namespace MandarinBid.Services.Background
             var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
             var queue = scope.ServiceProvider.GetRequiredService<IBackgroundTaskQueue>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
- 
+
+            var now = DateTimeOffset.UtcNow;
 
             var expired = await db.Mandarins
                 .Include(m => m.Bids)
-                .Where(m => m.ExpirationDate <= DateTimeOffset.UtcNow)
+                .Where(m => m.ExpirationDate <= now.AddSeconds(-5))
                 .ToListAsync();
 
             foreach (var mandarin in expired)
@@ -64,10 +66,28 @@ namespace MandarinBid.Services.Background
 
                     queue.Queue(async token =>
                     {
+                        var body = $@"
+==============================
+        MANDARIN AUCTION
+==============================
+
+ЧЕК № {mandarin.Id}
+
+Лот: {mandarin.Name}
+Победитель: {user.UserName}
+Ставка: {winner.Amount} ₽
+
+Дата: {DateTimeOffset.UtcNow.ToLocalTime():dd.MM.yyyy HH:mm:ss}
+
+------------------------------
+Спасибо за участие в аукционе!
+==============================
+";
+
                         await emailService.SendAsync(
                             email,
-                            "Вы выиграли аукцион",
-                            $"Вы выиграли {mandarin.Name} со ставкой {winner.Amount}"
+                            "Вы выиграли аукцион 🍊",
+                            body
                         );
                     });
                 }
