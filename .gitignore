@@ -3,3 +3,7 @@
 [Oo]bj/
 *.user
 *.suo
+
+# Твои секреты
+appsettings.Development.json
+secrets.json
