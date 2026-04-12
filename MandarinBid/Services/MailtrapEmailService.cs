@@ -40,12 +40,23 @@ namespace MandarinBid.Services
 
                 request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await _http.SendAsync(request);
+                for (int i = 0; i < 3; i++)
+                {
+                    var response = await _http.SendAsync(request);
 
-                var result = await response.Content.ReadAsStringAsync();
+                    if (response.IsSuccessStatusCode)
+                        break;
 
-                Console.WriteLine($"[EMAIL API] {response.StatusCode}");
-                Console.WriteLine($"[EMAIL BODY] {result}");
+                    await Task.Delay(1000);
+
+                    var result = await response.Content.ReadAsStringAsync();
+
+                    Console.WriteLine($"[EMAIL API] {response.StatusCode}");
+                    Console.WriteLine($"[EMAIL BODY] {result}");
+
+                }
+
+
             }
             catch (Exception ex)
             {
