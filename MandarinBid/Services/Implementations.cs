@@ -82,12 +82,16 @@ namespace MandarinBid.Services.Implementations
                         {
                             var email = user.Email;
 
+                            Console.WriteLine($"[EMAIL QUEUED] {email}");
+
                             await _email.SendAsync(
                                 email,
                                 "Ваша ставка перебита",
                                 $"Вашу ставку на {mandarin.Name} перебили"
-
                             );
+
+                            Console.WriteLine($"[EMAIL SENT] {email}");
+
                         }
                     });
                 }
