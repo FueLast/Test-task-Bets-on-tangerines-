@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MandarinBid.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260411174247_InitFixed")]
+    [Migration("20260412151637_InitFixed")]
     partial class InitFixed
     {
         /// <inheritdoc />
