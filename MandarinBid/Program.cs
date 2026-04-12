@@ -31,8 +31,9 @@ builder.Services.AddHostedService<MandarinCleanupService>();
 builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
 builder.Services.AddHostedService<EmailBackgroundService>();
  
-builder.Services.AddScoped<IAuctionService, AuctionService>();
-builder.Services.AddScoped<IEmailService, MailtrapEmailService>();
+builder.Services.AddScoped<IAuctionService, AuctionService>(); 
+
+builder.Services.AddHttpClient<IEmailService, MailtrapEmailService>();
 
 
 var app = builder.Build();

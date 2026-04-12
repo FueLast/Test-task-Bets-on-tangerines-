@@ -11,10 +11,10 @@ namespace MandarinBid.Services
         private readonly IConfiguration _config;
         private readonly HttpClient _http;
 
-        public MailtrapEmailService(IConfiguration config)
+        public MailtrapEmailService(IConfiguration config, HttpClient http)
         {
             _config = config;
-            _http = new HttpClient();
+            _http = http;
         }
 
         public async Task SendAsync(string to, string subject, string body)
@@ -25,10 +25,10 @@ namespace MandarinBid.Services
 
                 var payload = new
                 {
-                    from = new { email = "mandarin@auction.com", name = "Mandarin Auction" },
+                    from = new { email = "mailtrap@demomailtrap.co", name = "Mandarin Auction" },
                     to = new[] { new { email = to } },
                     subject = subject,
-                    html = body   // ← ВОТ ЭТО КЛЮЧЕВОЕ
+                    text = body
                 };
 
                 var json = JsonSerializer.Serialize(payload);
