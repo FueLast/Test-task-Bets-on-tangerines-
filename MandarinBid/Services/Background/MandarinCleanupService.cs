@@ -42,7 +42,7 @@ namespace MandarinBid.Services.Background
 
             var expired = await db.Mandarins
                 .Include(m => m.Bids)
-                .Where(m => m.ExpirationDate <= now.AddSeconds(-5))
+                .Where(m => m.ExpirationDate <= now.AddSeconds(-5) && !m.IsProcessed)
                 .ToListAsync();
 
             foreach (var mandarin in expired)
@@ -67,21 +67,20 @@ namespace MandarinBid.Services.Background
                     queue.Queue(async token =>
                     {
                         var body = $@"
-==============================
-        MANDARIN AUCTION
-==============================
+🍊 MANDARIN AUCTION
 
+══════════════════════════════
 ЧЕК № {mandarin.Id}
+══════════════════════════════
 
-Лот: {mandarin.Name}
+Лот:        {mandarin.Name}
 Победитель: {user.UserName}
-Ставка: {winner.Amount} ₽
+Ставка:     {winner.Amount} ₽
 
 Дата: {DateTimeOffset.UtcNow.ToLocalTime():dd.MM.yyyy HH:mm:ss}
 
-------------------------------
-Спасибо за участие в аукционе!
-==============================
+══════════════════════════════
+Спасибо за участие!
 ";
 
                         await emailService.SendAsync(
@@ -90,6 +89,9 @@ namespace MandarinBid.Services.Background
                             body
                         );
                     });
+
+                    mandarin.IsProcessed = true;
+
                 }
             }
 

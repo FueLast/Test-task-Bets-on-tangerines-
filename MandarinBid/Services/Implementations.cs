@@ -86,6 +86,7 @@ namespace MandarinBid.Services.Implementations
                                 email,
                                 "Ваша ставка перебита",
                                 $"Вашу ставку на {mandarin.Name} перебили"
+
                             );
                         }
                     });

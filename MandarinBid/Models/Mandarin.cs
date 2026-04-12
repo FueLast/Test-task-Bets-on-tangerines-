@@ -23,5 +23,7 @@ namespace MandarinBid.Models
 
         // навигация к ставкам (связь 1 ко многим)
         public List<Bid> Bids { get; set; } = new();
+
+        public bool IsProcessed { get; set; }
     }
 }

@@ -25,10 +25,10 @@ namespace MandarinBid.Services
 
                 var payload = new
                 {
-                    from = new { email = "mailtrap@demomailtrap.co", name = "Mandarin Auction" },
+                    from = new { email = "mandarin@auction.com", name = "Mandarin Auction" },
                     to = new[] { new { email = to } },
                     subject = subject,
-                    text = body
+                    html = body   // ← ВОТ ЭТО КЛЮЧЕВОЕ
                 };
 
                 var json = JsonSerializer.Serialize(payload);
