@@ -137,12 +137,25 @@
             const expiration = new Date(el.dataset.expiration);
             const now = new Date();
 
-            if (expiration <= now) {
+            const diff = expiration - now;
+
+            if (diff <= 0) {
                 el.innerText = "Аукцион завершен";
                 el.classList.add("text-danger");
+                return;
             }
+
+            const seconds = Math.floor(diff / 1000) % 60;
+            const minutes = Math.floor(diff / 1000 / 60) % 60;
+            const hours = Math.floor(diff / 1000 / 60 / 60);
+
+            el.innerText =
+                `Осталось: ${hours.toString().padStart(2, '0')}:` +
+                `${minutes.toString().padStart(2, '0')}:` +
+                `${seconds.toString().padStart(2, '0')}`;
         });
     }
 
     setInterval(updateTimers, 1000);
+    updateTimers();
 </script>
