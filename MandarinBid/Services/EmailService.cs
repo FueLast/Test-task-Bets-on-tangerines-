@@ -23,7 +23,7 @@ namespace MandarinBid.Services
                         _config["Email:User"],
                         _config["Email:Pass"]
                     ),
-                    EnableSsl = true
+                    EnableSsl = false
                 };
 
                 var mail = new MailMessage(
@@ -37,7 +37,7 @@ namespace MandarinBid.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[EMAIL ERROR] {ex.Message}");
+                Console.WriteLine($"[EMAIL ERROR] {ex}");
             }
         }
     }
