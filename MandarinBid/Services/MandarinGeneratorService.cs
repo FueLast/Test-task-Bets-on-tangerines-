@@ -1,6 +1,5 @@
 ﻿using MandarinBid.Data;
 using MandarinBid.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace MandarinBid.Services
 {

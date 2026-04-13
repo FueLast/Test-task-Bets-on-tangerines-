@@ -1,9 +1,7 @@
-﻿using MandarinBid.Services.Implementations;
-using MandarinBid.Services.Interfaces;
+﻿using MandarinBid.Services.Interfaces;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace MandarinBid.Services
 {

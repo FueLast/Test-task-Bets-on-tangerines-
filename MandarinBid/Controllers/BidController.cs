@@ -1,4 +1,5 @@
-﻿using MandarinBid.Services.Interfaces;
+﻿using MandarinBid.Controllers;
+using MandarinBid.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -6,10 +7,14 @@ using System.Security.Claims;
 public class BidController : Controller
 {
     private readonly IAuctionService _auctionService;
+    private readonly ILogger<AuctionController> _logger;
 
-    public BidController(IAuctionService auctionService)
+    public BidController(
+            IAuctionService auctionService,
+            ILogger<AuctionController> logger)
     {
         _auctionService = auctionService;
+        _logger = logger;
     }
 
     [HttpPost]
@@ -37,6 +42,10 @@ public class BidController : Controller
         {
             TempData["Success"] = "Ставка принята";
             TempData["SuccessMandarinId"] = mandarinId;
+
+            _logger.LogInformation("User {UserId} placing bid {Amount} on {MandarinId}",
+                userId, amount, mandarinId);
+
         }
 
         return RedirectToAction("Index", "Auction");
