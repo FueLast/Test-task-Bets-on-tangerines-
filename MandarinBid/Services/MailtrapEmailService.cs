@@ -32,16 +32,11 @@ namespace MandarinBid.Services
                 };
 
                 var json = JsonSerializer.Serialize(payload);
-
-                var request = new HttpRequestMessage(HttpMethod.Post, "https://send.api.mailtrap.io/api/send");
-
-                request.Headers.Authorization =
-                    new AuthenticationHeaderValue("Bearer", token);
-
-                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
-
+                  
                 for (int i = 0; i < 3; i++)
-                { 
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Post, "https://send.api.mailtrap.io/api/send");
+
                     request.Headers.Authorization =
                         new AuthenticationHeaderValue("Bearer", token);
 
