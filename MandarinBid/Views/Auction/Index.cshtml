@@ -114,7 +114,7 @@
                         @if (topBid != null)
                         {
                             <p class="text-primary">
-                                Победитель: @topBid.UserId
+                                Победитель: @(topBid.UserName ?? topBid.UserId)
                             </p>
                         }
                     }
@@ -156,6 +156,7 @@
         });
     }
 
-    setInterval(updateTimers, 1000);
-    updateTimers();
+    setInterval(() => {
+        location.reload();
+    }, 5000);
 </script>

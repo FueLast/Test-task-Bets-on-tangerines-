@@ -43,8 +43,7 @@ public class BidController : Controller
             TempData["Success"] = "Ставка принята";
             TempData["SuccessMandarinId"] = mandarinId;
 
-            _logger.LogInformation("User {UserId} placing bid {Amount} on {MandarinId}",
-                userId, amount, mandarinId);
+            _logger.LogInformation("Bid request: user {UserId}, amount {Amount}", userId, amount);
 
         }
 

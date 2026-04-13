@@ -1,7 +1,5 @@
-﻿using MandarinBid.Models;
-using MandarinBid.Services.Interfaces;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using MandarinBid.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc; 
 using System.Security.Claims;
 
 namespace MandarinBid.Controllers
@@ -10,9 +8,14 @@ namespace MandarinBid.Controllers
     {
         private readonly IAuctionService _auctionService;
 
-        public AuctionController(IAuctionService auctionService)
+        private readonly ILogger<AuctionController> _logger;
+
+        public AuctionController(
+            IAuctionService auctionService,
+            ILogger<AuctionController> logger)
         {
             _auctionService = auctionService;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index()
@@ -41,9 +44,13 @@ namespace MandarinBid.Controllers
             {
                 TempData["Success"] = "Ставка принята";
                 TempData["SuccessMandarinId"] = mandarinId;
+
+                _logger.LogInformation("User {UserId} placing bid {Amount} on {MandarinId}",
+                    userId, amount, mandarinId);
             }
 
             return RedirectToAction("Index");
+             
         }
 
 

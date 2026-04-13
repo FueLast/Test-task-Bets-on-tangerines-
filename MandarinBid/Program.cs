@@ -75,14 +75,14 @@ using (var scope = app.Services.CreateScope())
     {
         db.Mandarins.Add(new MandarinBid.Models.Mandarin
         {
-            Name = "Мандаринка #1",
-            CurrentPrice = 100,
+            Name = "🍊Мандаринка #1",
+            CurrentPrice = 100, 
             ExpirationDate = DateTimeOffset.UtcNow.AddMinutes(1)
         });
 
         db.Mandarins.Add(new MandarinBid.Models.Mandarin
         {
-            Name = "Мандаринка #2",
+            Name = "🍊Мандаринка #2",
             CurrentPrice = 150,
             ExpirationDate = DateTimeOffset.UtcNow.AddMinutes(60)
         });
