@@ -54,6 +54,7 @@ namespace MandarinBid.Services.Background
                 // нет ставок -просто пропускаем
                 if (winner == null)
                 {
+                    mandarin.IsProcessed = true;
                     Console.WriteLine($"[Cleanup] {mandarin.Name} завершён без ставок");
                     continue;
                 }
