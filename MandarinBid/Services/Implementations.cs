@@ -60,11 +60,14 @@ namespace MandarinBid.Services.Implementations
 
             mandarin.CurrentPrice = amount;
 
+            var user = await _userManager.FindByIdAsync(userId);
+
             _db.Bids.Add(new Bid
             {
                 MandarinId = mandarinId,
                 Amount = amount,
                 UserId = userId,
+                UserName = user?.UserName ?? "unknown",
                 CreatedAt = DateTimeOffset.UtcNow
             });
 

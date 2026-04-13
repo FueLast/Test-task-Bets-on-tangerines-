@@ -61,7 +61,8 @@ namespace MandarinBid.Migrations
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     ExpirationDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
+                    IsProcessed = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -182,6 +183,7 @@ namespace MandarinBid.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     MandarinId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },

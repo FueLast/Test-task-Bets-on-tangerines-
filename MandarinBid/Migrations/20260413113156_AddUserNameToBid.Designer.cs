@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MandarinBid.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260412151637_InitFixed")]
-    partial class InitFixed
+    [Migration("20260413113156_AddUserNameToBid")]
+    partial class AddUserNameToBid
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -47,6 +47,10 @@ namespace MandarinBid.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("MandarinId");
@@ -74,6 +78,9 @@ namespace MandarinBid.Migrations
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsProcessed")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()

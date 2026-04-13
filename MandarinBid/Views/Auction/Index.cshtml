@@ -42,7 +42,7 @@
                     @* Лидер *@
                     @if (topBid != null)
                     {
-                        <p>Лидер: @topBid.UserId</p>
+                        <p>Лидер: @(topBid.UserName ?? topBid.UserId)</p>
                     }
 
                     @* Блок ставок *@
@@ -94,7 +94,7 @@
                                 var isTop = bid == orderedBids.First();
 
                                 <li class="list-group-item d-flex justify-content-between @(isTop ? "list-group-item-success" : "")">
-                                    <span>@bid.UserId</span>
+                                    <span>@(bid.UserName ?? bid.UserId)</span>
                                     <span>@bid.Amount ₽</span>
                                 </li>
                             }
