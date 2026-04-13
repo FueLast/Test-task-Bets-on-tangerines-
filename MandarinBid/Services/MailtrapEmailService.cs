@@ -23,6 +23,12 @@ namespace MandarinBid.Services
             {
                 var token = _config["EmailApi:Token"];
 
+                if (string.IsNullOrEmpty(token))
+                {
+                    Console.WriteLine("[EMAIL ERROR] Token is missing");
+                    return;
+                }
+
                 var payload = new
                 {
                     from = new { email = "mailtrap@demomailtrap.co", name = "Mandarin Auction" },
