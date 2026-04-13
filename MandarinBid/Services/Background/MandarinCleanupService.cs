@@ -1,5 +1,6 @@
 ﻿using MandarinBid.Data;
 using MandarinBid.Models;
+using MandarinBid.Services.Implementations;
 using MandarinBid.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -12,9 +13,14 @@ namespace MandarinBid.Services.Background
     {
         private readonly IServiceScopeFactory _scopeFactory;
 
-        public MandarinCleanupService(IServiceScopeFactory scopeFactory)
+        private readonly ILogger<MandarinCleanupService> _logger;
+
+        public MandarinCleanupService(
+            IServiceScopeFactory scopeFactory,
+            ILogger<MandarinCleanupService> logger)
         {
             _scopeFactory = scopeFactory;
+            _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -45,17 +51,19 @@ namespace MandarinBid.Services.Background
                 .Where(m => m.ExpirationDate <= now.AddSeconds(-5) && !m.IsProcessed)
                 .ToListAsync();
 
+            _logger.LogInformation("Processing expired mandarins: {Count}", expired.Count);
+
             foreach (var mandarin in expired)
             {
                 var winner = mandarin.Bids
                     .OrderByDescending(b => b.Amount)
                     .FirstOrDefault();
 
-                // нет ставок -просто пропускаем
                 if (winner == null)
                 {
                     mandarin.IsProcessed = true;
-                    Console.WriteLine($"[Cleanup] {mandarin.Name} завершён без ставок");
+
+                    _logger.LogInformation("Mandarin {Name} finished without bids", mandarin.Name);
                     continue;
                 }
 
@@ -64,6 +72,8 @@ namespace MandarinBid.Services.Background
                 if (user != null && !string.IsNullOrEmpty(user.Email))
                 {
                     var email = user.Email;
+
+                    _logger.LogInformation("Winner found: {User} for mandarin {Id}", user.UserName, mandarin.Id);
 
                     queue.Queue(async token =>
                     {
@@ -83,23 +93,20 @@ namespace MandarinBid.Services.Background
 ══════════════════════════════
 Спасибо за участие!
 ";
-
-                        await emailService.SendAsync(
-                            email,
-                            "Вы выиграли аукцион 🍊",
-                            body
-                        );
+                        await emailService.SendAsync(email, "Вы выиграли аукцион 🍊", body);
                     });
 
-                    mandarin.IsProcessed = true;
-
+                    _logger.LogInformation("Email queued for winner: {Email}", email);
                 }
+
+                mandarin.IsProcessed = true;
             }
 
-            db.Mandarins.RemoveRange(expired);
-            Console.WriteLine($"[Cleanup] удалено {expired.Count} мандаринок");
-            await db.SaveChangesAsync();
 
+            db.Mandarins.RemoveRange(expired);
+            _logger.LogInformation("Deleted mandarins: {Count}", expired.Count);
+
+            await db.SaveChangesAsync();
         }
     }
 }

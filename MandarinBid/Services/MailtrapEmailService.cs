@@ -1,4 +1,5 @@
-﻿using MandarinBid.Services.Interfaces;
+﻿using MandarinBid.Services.Implementations;
+using MandarinBid.Services.Interfaces;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -11,10 +12,17 @@ namespace MandarinBid.Services
         private readonly IConfiguration _config;
         private readonly HttpClient _http;
 
-        public MailtrapEmailService(IConfiguration config, HttpClient http)
+        private readonly ILogger<MailtrapEmailService> _logger;
+
+
+        public MailtrapEmailService(
+            IConfiguration config, 
+            HttpClient http,
+            ILogger<MailtrapEmailService> logger)
         {
             _config = config;
             _http = http;
+            _logger = logger;
         }
 
         public async Task SendAsync(string to, string subject, string body)
@@ -25,7 +33,7 @@ namespace MandarinBid.Services
 
                 if (string.IsNullOrEmpty(token))
                 {
-                    Console.WriteLine("[EMAIL ERROR] Token is missing");
+                    _logger.LogError("Email sending failed: Mailtrap token is missing in configuration");
                     return;
                 }
 
@@ -41,7 +49,7 @@ namespace MandarinBid.Services
                   
                 for (int i = 0; i < 3; i++)
                 {
-                    var request = new HttpRequestMessage(HttpMethod.Post, "https://send.api.mailtrap.io/api/send");
+                    using var request = new HttpRequestMessage(HttpMethod.Post, "https://send.api.mailtrap.io/api/send");
 
                     request.Headers.Authorization =
                         new AuthenticationHeaderValue("Bearer", token);
@@ -51,12 +59,14 @@ namespace MandarinBid.Services
                     var response = await _http.SendAsync(request);
 
                     if (response.IsSuccessStatusCode)
-                        break;
+                    {
+                        _logger.LogInformation("Email successfully sent to {Email}", to);
+                        return;
+                    }
 
                     var result = await response.Content.ReadAsStringAsync();
-
-                    Console.WriteLine($"[EMAIL API] {response.StatusCode}");
-                    Console.WriteLine($"[EMAIL BODY] {result}");
+                    _logger.LogWarning("Email API attempt {Attempt} failed: {StatusCode}. Response: {Response}", 
+                        i + 1, response.StatusCode, result);
 
                     await Task.Delay(1000);
                 }
@@ -65,7 +75,7 @@ namespace MandarinBid.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[EMAIL API ERROR] {ex.Message}");
+                _logger.LogError(ex, "Email sending failed to {Email}", to);
             }
         }
     }

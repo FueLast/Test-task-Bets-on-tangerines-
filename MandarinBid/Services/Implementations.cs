@@ -15,16 +15,21 @@ namespace MandarinBid.Services.Implementations
 
         private readonly UserManager<IdentityUser> _userManager;
 
+        private readonly ILogger<AuctionService> _logger;
+
+
         public AuctionService(
             ApplicationDbContext db,
             IBackgroundTaskQueue queue,
             IEmailService email,
-            UserManager<IdentityUser> userManager)
+            UserManager<IdentityUser> userManager,
+            ILogger<AuctionService> logger)
         {
             _db = db;
             _queue = queue;
             _email = email;
             _userManager = userManager;
+            _logger = logger;
         }
 
         public async Task<List<Mandarin>> GetActiveMandarinsAsync()
@@ -75,6 +80,9 @@ namespace MandarinBid.Services.Implementations
             {
                 await _db.SaveChangesAsync();
 
+                // логируем факт успешного сохранения ставки
+                _logger.LogInformation("New bid placed: {Amount} on {MandarinId}", amount, mandarin.Id);
+
                 if (previousTopBid != null)
                 {
                     _queue.Queue(async token =>
@@ -85,7 +93,7 @@ namespace MandarinBid.Services.Implementations
                         {
                             var email = user.Email;
 
-                            Console.WriteLine($"[EMAIL QUEUED] {email}");
+                            _logger.LogInformation("Outbid email queued for {Email}", email);
 
                             await _email.SendAsync(
                                 email,
@@ -93,11 +101,11 @@ namespace MandarinBid.Services.Implementations
                                 $"Вашу ставку на {mandarin.Name} перебили"
                             );
 
-                            Console.WriteLine($"[EMAIL SENT] {email}");
-
+                            _logger.LogInformation("Outbid email sent to {Email}", email);
                         }
                     });
                 }
+
 
                 return (true, null);
             }
