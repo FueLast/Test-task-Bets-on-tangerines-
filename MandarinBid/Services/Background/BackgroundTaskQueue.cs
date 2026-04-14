@@ -19,14 +19,21 @@ namespace MandarinBid.Services.Background
         private readonly Channel<Func<CancellationToken, Task>> _queue =
             Channel.CreateUnbounded<Func<CancellationToken, Task>>();
 
-        // добавляем задачу в очередь
+        /// <summary>
+        /// добавляет задачу в очередь фоновой обработки
+        /// </summary>
+        /// <param name="workItem">асинхронная задача</param>
         public void Queue(Func<CancellationToken, Task> workItem)
         {
             // trywrite — не блокирует поток (важно для производительности)
             _queue.Writer.TryWrite(workItem);
         }
 
-        // получаем следующую задачу (ожидает, если задач нет)
+        /// <summary>
+        /// извлекает задачу из очереди
+        /// </summary>
+        /// <param name="token">токен отмены</param>
+        /// <returns>задача для выполнения</returns>
         public async Task<Func<CancellationToken, Task>> DequeueAsync(CancellationToken token)
         {
             return await _queue.Reader.ReadAsync(token);

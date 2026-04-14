@@ -17,7 +17,13 @@
             _logger = logger;
         }
 
-        // основной цикл фонового сервиса
+        /// <summary>
+        /// основной цикл обработки очереди фоновых задач
+        /// </summary>
+        /// <param name="stoppingToken">токен остановки сервиса</param>
+        /// <remarks>
+        /// обрабатывает задачи последовательно и логирует результат выполнения
+        /// </remarks>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             // лог старта сервиса

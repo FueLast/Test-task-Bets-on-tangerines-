@@ -24,6 +24,12 @@ namespace MandarinBid.Services.Implementations
         // логгер
         private readonly ILogger<AuctionService> _logger;
 
+        /// <summary>
+        /// возвращает все активные лоты (у которых не истёк срок)
+        /// </summary>
+        /// <remarks>
+        /// включает связанные ставки и использует asnotracking для оптимизации чтения
+        /// </remarks>
         public AuctionService(
             ApplicationDbContext db,
             IBackgroundTaskQueue queue,
@@ -38,7 +44,10 @@ namespace MandarinBid.Services.Implementations
             _logger = logger;
         }
 
-        // получение всех активных (не истёкших) мандаринов
+        /// <summary>
+        /// получает список активных (не завершённых) аукционов
+        /// </summary>
+        /// <returns>список мандаринов с их ставками</returns>
         public async Task<List<Mandarin>> GetActiveMandarinsAsync()
         {
             return await _db.Mandarins
@@ -47,8 +56,23 @@ namespace MandarinBid.Services.Implementations
                 .AsNoTracking() // оптимизация: только чтение
                 .ToListAsync();
         }
-
-        // размещение ставки
+        /// <summary>
+        /// обрабатывает бизнес-логику размещения ставки
+        /// </summary>
+        /// <param name="mandarinId">id лота</param>
+        /// <param name="amount">сумма ставки</param>
+        /// <param name="userId">id пользователя</param>
+        /// <returns>
+        /// success + сообщение об ошибке (если есть)
+        /// </returns>
+        /// <remarks>
+        /// выполняет:
+        /// - валидацию ставки
+        /// - защиту от самоперебивания
+        /// - обновление текущей цены
+        /// - создание записи ставки
+        /// - отправку уведомления перебитому пользователю (async через очередь)
+        /// </remarks>
         public async Task<(bool Success, string Error)> PlaceBidAsync(int mandarinId, decimal amount, string userId)
         {
             // загружаем мандарин вместе со ставками

@@ -22,7 +22,9 @@ namespace MandarinBid.Services.Background
             _logger = logger;
         }
 
-        // основной цикл (периодический запуск cleanup)
+        /// <summary>
+        /// периодически запускает очистку завершённых аукционов
+        /// </summary>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
@@ -34,7 +36,15 @@ namespace MandarinBid.Services.Background
             }
         }
 
-        // обработка завершённых аукционов
+        /// <summary>
+        /// обрабатывает завершённые аукционы:
+        /// - определяет победителя
+        /// - отправляет уведомление
+        /// - удаляет лот
+        /// </summary>
+        /// <remarks>
+        /// использует отдельный scope для работы с scoped сервисами
+        /// </remarks>
         private async Task CleanupAsync()
         {
             try

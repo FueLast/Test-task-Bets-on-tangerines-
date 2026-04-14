@@ -26,6 +26,15 @@ namespace MandarinBid.Services
             _logger = logger;
         }
 
+        /// <summary>
+        /// отправляет email через mailtrap api
+        /// </summary>
+        /// <param name="to">получатель</param>
+        /// <param name="subject">тема письма</param>
+        /// <param name="body">тело письма</param>
+        /// <remarks>
+        /// использует retry механизм (до 3 попыток)
+        /// </remarks>
         public async Task SendAsync(string to, string subject, string body)
         {
             try

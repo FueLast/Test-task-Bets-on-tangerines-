@@ -13,6 +13,9 @@ namespace MandarinBid.Services
             _scopeFactory = scopeFactory;
         }
 
+        /// <summary>
+        /// фоновый сервис генерации новых лотов
+        /// </summary>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             // бесконечный цикл пока приложение работает
@@ -25,6 +28,9 @@ namespace MandarinBid.Services
             }
         }
 
+        /// <summary>
+        /// создаёт новый лот с коротким временем жизни
+        /// </summary>
         private async Task GenerateMandarin()
         {
             using var scope = _scopeFactory.CreateScope();

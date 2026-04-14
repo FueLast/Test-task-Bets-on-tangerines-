@@ -22,8 +22,15 @@ public class BidController : Controller
         _logger = logger;
     }
 
-    // endpoint для размещения ставки
-    // доступен только авторизованным пользователям
+    /// <summary>
+    /// endpoint для размещения ставки пользователем
+    /// </summary>
+    /// <param name="mandarinId">id лота</param>
+    /// <param name="amount">сумма ставки</param>
+    /// <returns>redirect на страницу аукциона с сообщением</returns>
+    /// <remarks>
+    /// требует авторизацию, выполняет базовую серверную валидацию
+    /// </remarks>
     [HttpPost]
     [Authorize]
     public async Task<IActionResult> Place(int mandarinId, decimal amount)
