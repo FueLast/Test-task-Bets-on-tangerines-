@@ -5,10 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MandarinBid.Services.Background
 {
+    // фоновый сервис для обработки завершённых аукционов
     public class MandarinCleanupService : BackgroundService
     {
+        // фабрика scope — нужна, потому что background service живёт дольше запроса
         private readonly IServiceScopeFactory _scopeFactory;
 
+        // логгер для отслеживания работы сервиса
         private readonly ILogger<MandarinCleanupService> _logger;
 
         public MandarinCleanupService(
@@ -19,24 +22,26 @@ namespace MandarinBid.Services.Background
             _logger = logger;
         }
 
+        // основной цикл (периодический запуск cleanup)
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
             {
                 await CleanupAsync();
 
-                // ждем 24 часа
-                //await Task.Delay(TimeSpan.FromHours(24), stoppingToken);
-
+                // в проде обычно раз в сутки, здесь уменьшено для тестирования
                 await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             }
         }
 
+        // обработка завершённых аукционов
         private async Task CleanupAsync()
         {
             try
             {
+                // создаём scope для получения scoped-сервисов (db, userManager и т.д.)
                 using var scope = _scopeFactory.CreateScope();
+
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
                 var queue = scope.ServiceProvider.GetRequiredService<IBackgroundTaskQueue>();
@@ -44,6 +49,7 @@ namespace MandarinBid.Services.Background
 
                 var now = DateTimeOffset.UtcNow;
 
+                // находим завершённые и ещё не обработанные лоты
                 var expired = await db.Mandarins
                     .Include(m => m.Bids)
                     .Where(m => m.ExpirationDate <= now.AddSeconds(-5) && !m.IsProcessed)
@@ -53,10 +59,12 @@ namespace MandarinBid.Services.Background
 
                 foreach (var mandarin in expired)
                 {
+                    // определяем победителя (максимальная ставка)
                     var winner = mandarin.Bids
                         .OrderByDescending(b => b.Amount)
                         .FirstOrDefault();
 
+                    // если ставок не было — просто помечаем как обработанный
                     if (winner == null)
                     {
                         mandarin.IsProcessed = true;
@@ -65,14 +73,17 @@ namespace MandarinBid.Services.Background
                         continue;
                     }
 
+                    // получаем пользователя-победителя
                     var user = await userManager.FindByIdAsync(winner.UserId);
 
+                    // если у пользователя есть email — отправляем уведомление
                     if (user != null && !string.IsNullOrEmpty(user.Email))
                     {
                         var email = user.Email;
 
                         _logger.LogInformation("Winner found: {User} for mandarin {Id}", user.UserName, mandarin.Id);
 
+                        // добавляем отправку email в очередь (не блокируем поток)
                         queue.Queue(async token =>
                         {
                             var body = $@"
@@ -91,25 +102,27 @@ namespace MandarinBid.Services.Background
 ══════════════════════════════
 Спасибо за участие!
 ";
+
                             await emailService.SendAsync(email, "Вы выиграли аукцион 🍊", body);
                         });
 
                         _logger.LogInformation("Email queued for winner: {Email}", email);
                     }
 
+                    // помечаем лот как обработанный, чтобы не обрабатывать повторно
                     mandarin.IsProcessed = true;
                 }
 
-
+                // удаляем обработанные лоты (в реальном проекте лучше архивировать)
                 db.Mandarins.RemoveRange(expired);
+
                 await db.SaveChangesAsync();
             }
-
             catch (Exception ex)
             {
+                // ловим любые ошибки, чтобы сервис не падал
                 _logger.LogError(ex, "Cleanup failed");
             }
-
         }
     }
 }
