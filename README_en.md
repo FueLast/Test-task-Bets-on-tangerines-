@@ -93,6 +93,22 @@ The project follows a **layered architecture**:
 
 ---
 
+## 📸 Screenshots
+
+| 🏠 Main Page |
+|------|
+| <img src="https://github.com/user-attachments/assets/4328935d-90fb-49d6-922e-5dc4fb7a057f" width="850"/>|
+
+| 📫 MailTrap |
+|--------|
+| <img src="https://github.com/user-attachments/assets/6f576890-1671-4c8d-9e38-826b8573cdd7" width="724"/>|
+
+| 📜 Electronic Check |
+|------|
+| <img src="https://github.com/user-attachments/assets/31dfeb0d-cc18-458c-819e-82ad22d8e55e" width="340"/> |
+
+---
+
 ## ⚠️ Concurrency Handling
 
 Implemented using:
