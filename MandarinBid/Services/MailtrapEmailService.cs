@@ -7,14 +7,17 @@ namespace MandarinBid.Services
 {
     public class MailtrapEmailService : IEmailService
     {
+        // конфиг (для токена)
         private readonly IConfiguration _config;
+
+        // http клиент
         private readonly HttpClient _http;
 
+        // логгер
         private readonly ILogger<MailtrapEmailService> _logger;
 
-
         public MailtrapEmailService(
-            IConfiguration config, 
+            IConfiguration config,
             HttpClient http,
             ILogger<MailtrapEmailService> logger)
         {
@@ -27,14 +30,17 @@ namespace MandarinBid.Services
         {
             try
             {
+                // берём api токен из конфигурации
                 var token = _config["EmailApi:Token"];
 
+                // если токена нет — логируем и выходим
                 if (string.IsNullOrEmpty(token))
                 {
                     _logger.LogError("Email sending failed: Mailtrap token is missing in configuration");
                     return;
                 }
 
+                // формируем payload для mailtrap api
                 var payload = new
                 {
                     from = new { email = "mailtrap@demomailtrap.co", name = "Mandarin Auction" },
@@ -44,7 +50,8 @@ namespace MandarinBid.Services
                 };
 
                 var json = JsonSerializer.Serialize(payload);
-                  
+
+                // retry механизм (3 попытки)
                 for (int i = 0; i < 3; i++)
                 {
                     using var request = new HttpRequestMessage(HttpMethod.Post, "https://send.api.mailtrap.io/api/send");
@@ -56,23 +63,24 @@ namespace MandarinBid.Services
 
                     var response = await _http.SendAsync(request);
 
+                    // успех
                     if (response.IsSuccessStatusCode)
                     {
                         _logger.LogInformation("Email successfully sent to {Email}", to);
                         return;
                     }
 
+                    // лог ошибки ответа
                     var result = await response.Content.ReadAsStringAsync();
-                    _logger.LogWarning("Email API attempt {Attempt} failed: {StatusCode}. Response: {Response}", 
+                    _logger.LogWarning("Email API attempt {Attempt} failed: {StatusCode}. Response: {Response}",
                         i + 1, response.StatusCode, result);
 
                     await Task.Delay(1000);
                 }
-
-
             }
             catch (Exception ex)
             {
+                // глобальная ошибка отправки
                 _logger.LogError(ex, "Email sending failed to {Email}", to);
             }
         }

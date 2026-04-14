@@ -9,14 +9,20 @@ namespace MandarinBid.Services.Implementations
 {
     public class AuctionService : IAuctionService
     {
+        // основной контекст базы данных
         private readonly ApplicationDbContext _db;
+
+        // очередь фоновых задач (для email и прочего)
         private readonly IBackgroundTaskQueue _queue;
+
+        // сервис отправки email
         private readonly IEmailService _email;
 
+        // менеджер пользователей (identity)
         private readonly UserManager<IdentityUser> _userManager;
 
+        // логгер
         private readonly ILogger<AuctionService> _logger;
-
 
         public AuctionService(
             ApplicationDbContext db,
@@ -32,17 +38,20 @@ namespace MandarinBid.Services.Implementations
             _logger = logger;
         }
 
+        // получение всех активных (не истёкших) мандаринов
         public async Task<List<Mandarin>> GetActiveMandarinsAsync()
         {
             return await _db.Mandarins
-                .Include(m => m.Bids)
-                .Where(m => m.ExpirationDate > DateTimeOffset.UtcNow)
-                .AsNoTracking()
+                .Include(m => m.Bids) // подтягиваем ставки
+                .Where(m => m.ExpirationDate > DateTimeOffset.UtcNow) // только активные
+                .AsNoTracking() // оптимизация: только чтение
                 .ToListAsync();
         }
 
+        // размещение ставки
         public async Task<(bool Success, string Error)> PlaceBidAsync(int mandarinId, decimal amount, string userId)
         {
+            // загружаем мандарин вместе со ставками
             var mandarin = await _db.Mandarins
                 .Include(m => m.Bids)
                 .FirstOrDefaultAsync(m => m.Id == mandarinId);
@@ -50,29 +59,36 @@ namespace MandarinBid.Services.Implementations
             if (mandarin == null)
                 return (false, "Лот не найден");
 
+            // защита от ставок после окончания
             if (mandarin.ExpirationDate <= DateTimeOffset.UtcNow)
                 return (false, "Аукцион уже завершён");
 
+            // находим текущую топ ставку
             var previousTopBid = mandarin.Bids
                 .OrderByDescending(b => b.Amount)
                 .FirstOrDefault();
 
+            // ставка должна быть выше текущей цены
             if (amount <= mandarin.CurrentPrice)
                 return (false, "Ставка должна быть выше текущей");
 
+            // нельзя перебивать самого себя
             if (previousTopBid != null && previousTopBid.UserId == userId)
                 return (false, "Ты уже лидер ставки");
 
+            // обновляем текущую цену
             mandarin.CurrentPrice = amount;
 
+            // получаем пользователя для записи username
             var user = await _userManager.FindByIdAsync(userId);
 
+            // добавляем новую ставку
             _db.Bids.Add(new Bid
             {
                 MandarinId = mandarinId,
                 Amount = amount,
                 UserId = userId,
-                UserName = user?.UserName ?? "unknown",
+                UserName = user?.UserName ?? "unknown", // fallback если что-то пошло не так
                 CreatedAt = DateTimeOffset.UtcNow
             });
 
@@ -80,9 +96,10 @@ namespace MandarinBid.Services.Implementations
             {
                 await _db.SaveChangesAsync();
 
-                // логируем факт успешного сохранения ставки
+                // лог успешной ставки
                 _logger.LogInformation("New bid placed: {Amount} on {MandarinId}", amount, mandarin.Id);
 
+                // если был предыдущий лидер — отправляем ему уведомление
                 if (previousTopBid != null)
                 {
                     _queue.Queue(async token =>
@@ -106,11 +123,11 @@ namespace MandarinBid.Services.Implementations
                     });
                 }
 
-
                 return (true, null);
             }
             catch (DbUpdateConcurrencyException)
             {
+                // если произошёл конфликт (два пользователя одновременно ставят)
                 return (false, "Ставку уже перебили, попробуй ещё раз");
             }
         }
