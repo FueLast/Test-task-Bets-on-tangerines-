@@ -195,19 +195,32 @@
 
 ## 🚀 Запуск проекта
 
-1. Указать строку подключения в `appsettings.json`
+1. Клонировать репозиторий:
+   ```bash
+   git clone https://github.com/FueLast/Test-task-Bets-on-tangerines-.git
+   cd Test-task-Bets-on-tangerines-
 
-2. Применить миграции:
+2. Восстановить зависимости:
+   ```bash
+   dotnet restore
+
+3. Указать строку подключения в appsettings.json:
+   ```JSON
+   "ConnectionStrings": {
+   "DefaultConnection": "Server=.;Database=MandarinBidDb;Trusted_Connection=True;TrustServerCertificate=True;"
+   }
+
+4. Применить миграции:
    ```bash
    dotnet ef database update
 
-3. Запустить приложение:
+5. Запустить приложение:
    ```bash
    dotnet run
 
-4. Открыть в браузере:
-  https://localhost:5001
-
+6. Открыть в браузере:
+   ```
+   https://localhost:5001   
 ---
 
 ## 📎 Дополнительно
