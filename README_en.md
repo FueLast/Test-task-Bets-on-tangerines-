@@ -195,19 +195,32 @@ Core logic, architecture, and concurrency handling were designed and implemented
 
 ## 🚀 How to Run
 
-1. Set connection string in `appsettings.json`
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/FueLast/Test-task-Bets-on-tangerines-.git
+   cd Test-task-Bets-on-tangerines-
 
-2. Apply migrations:
+2. Restore dependencies:
+   ```bash
+   dotnet restore
+
+3. Configure connection string in appsettings.json:
+   ```JSON
+   "ConnectionStrings": {
+   "DefaultConnection": "Server=.;Database=MandarinBidDb;Trusted_Connection=True;TrustServerCertificate=True;"
+   }
+
+4. Apply migrations:
    ```bash
    dotnet ef database update
 
-3. Run the app:
+5. Run the application:
    ```bash
    dotnet run
 
-4. Open in browser:
-https://localhost:5001
-
+6. Open in browser:
+   ```
+   https://localhost:5001   
 ---
 
 ## 📎 Additional Notes
